@@ -1,4 +1,6 @@
-[
- [:app :lt.objs.plugins/load-js "test_runner_compiled.js"]
- [:test_runner.hello :lt.plugins.test_runner/on-close-destroy]
- ]
+{:+
+ {:app [(:lt.objs.plugins/load-js "test_runner_compiled.js")]
+  :workspace.folder.root [:lt.plugins.test_runner/on-root-menu]
+  :test_runner.midje-tester [:lt.plugins.test_runner/on-close-destroy]
+  }
+}

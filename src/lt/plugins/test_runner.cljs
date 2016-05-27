@@ -1,18 +1,19 @@
 (ns lt.plugins.test_runner
   (:require [lt.object :as object]
             [lt.objs.tabs :as tabs]
-            [lt.objs.command :as cmd])
+            [lt.objs.command :as cmd]
+            [lt.objs.sidebar.workspace :as workspace])
   (:require-macros [lt.macros :refer [defui behavior]]))
 
-(defui hello-panel [this]
-  [:h1 "Hello from test_runner"])
+(defui midje-tester-panel [this]
+  [:h1 "Hello from test_runner more test"])
 
-(object/object* ::test_runner.hello
-                :tags [:test_runner.hello]
+(object/object* ::test_runner.midje-tester
+                :tags [:test_runner.midje-tester]
                 :behaviors [::on-close-destroy]
-                :name "test_runner"
+                :name "Midje Tester"
                 :init (fn [this]
-                        (hello-panel this)))
+                        (midje-tester-panel this)))
 
 (behavior ::on-close-destroy
           :triggers #{:close}
@@ -23,9 +24,29 @@
                           (tabs/rem-tabset ts)))
                       (object/raise this :destroy)))
 
-(def hello (object/create ::test_runner.hello))
+(behavior ::on-root-menu
+          :triggers #{:menu-items}
+          :reaction (fn [this items]
+                      (conj items
+                            {:type "separator"
+                             :order 11}
+                            {:label "Test plugin"
+                             :order 12
+                             :click (fn [] (prn (:path (deref this))))})
+                      ))
+
+(behavior ::on-open-tester
+          :triggers #{:menu-selected}
+          )
+
+(def midje-tester (object/create ::test_runner.midje-tester))
 
 (cmd/command {:command ::say-hello
-              :desc "test_runner: Say Hello"
+              :desc "test_runner: Say Hello world"
               :exec (fn []
-                      (tabs/add-or-focus! hello))})
+                      (tabs/add-or-focus! midje-tester))})
+
+workspace/root
+
+
+(deref workspace/tree)
