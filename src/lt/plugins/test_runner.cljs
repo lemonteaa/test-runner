@@ -52,11 +52,13 @@
 (cmd/command {:command ::say-hello
               :desc "test_runner: Say Hello world"
               :exec (fn []
+                      (prn "Test")
+                      (object/update! midje-tester [:path] (constantly (-> @(lt.objs.editor.pool/last-active) :info :path)))
+                      (object/update! midje-tester [:content] (constantly (midje-tester-panel (deref midje-tester))))
                       (tabs/add-or-focus! midje-tester))})
 
 workspace/root
 
 
 (deref workspace/tree)
-
 
