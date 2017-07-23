@@ -6,7 +6,9 @@
   (:require-macros [lt.macros :refer [defui behavior]]))
 
 (defui midje-tester-panel [this]
-  [:h1 "Hello from test_runner more test"])
+  [:div
+    [:h1 "Hello from test_runner more test"]
+    [:h2 (:path this)]])
 
 (object/object* ::test_runner.midje-tester
                 :tags [:test_runner.midje-tester]
@@ -32,12 +34,18 @@
                              :order 11}
                             {:label "Test plugin"
                              :order 12
-                             :click (fn [] (prn (:path (deref this))))})
+                             :click (fn []
+                                      (prn (:path (deref this)))
+                                      (object/raise this :menu-selected (:path (deref this))))})
                       ))
 
 (behavior ::on-open-tester
           :triggers #{:menu-selected}
-          )
+          :reaction (fn [this path]
+                      (object/update! midje-tester [:path] (constantly path))
+                      (object/update! midje-tester [:content] (constantly (midje-tester-panel (deref midje-tester))))
+                      (prn (deref midje-tester))
+                      (tabs/add-or-focus! midje-tester)))
 
 (def midje-tester (object/create ::test_runner.midje-tester))
 
@@ -50,3 +58,5 @@ workspace/root
 
 
 (deref workspace/tree)
+
+
