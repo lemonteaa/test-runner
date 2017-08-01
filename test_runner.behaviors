@@ -2,5 +2,6 @@
  {:app [(:lt.objs.plugins/load-js "test_runner_compiled.js")]
   :workspace.folder.root [:lt.plugins.test_runner/on-root-menu :lt.plugins.test_runner/on-open-tester]
   :test_runner.midje-tester [:lt.plugins.test_runner/on-close-destroy]
+  :editor.plaintext [:lt.plugins.test_runner/my-file-save]
   }
 }

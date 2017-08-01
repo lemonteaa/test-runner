@@ -39,6 +39,12 @@
                                       (object/raise this :menu-selected (:path (deref this))))})
                       ))
 
+(behavior ::my-file-save
+          :triggers #{:save}
+          :reaction (fn [editor]
+                      (prn "saving.....")
+                      (prn "Path: " (-> @editor :info (get :path) (or "")))))
+
 (behavior ::on-open-tester
           :triggers #{:menu-selected}
           :reaction (fn [this path]
@@ -61,4 +67,14 @@ workspace/root
 
 
 (deref workspace/tree)
+
+(-> @(lt.objs.editor.pool/last-active) :reaction)
+
+(object/by-tag :evaler)
+
+(map #(-> @% :info (get :path) (or "")) (object/by-tag :editor))
+
+
+(:info @(last (object/by-tag :editor)))
+;;;;
 
