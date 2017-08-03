@@ -1,0 +1,31 @@
+(ns nrepl.ping
+  (:require [clojure.tools.nrepl.transport :as t]
+            [clojure.tools.nrepl.misc :refer [response-for]]
+            [clojure.string :as s]
+            [clojure.edn :as edn]))
+
+(defn wrap-ping
+  [h]
+  (fn [{:keys [op transport data rtn-fmt] :as msg}]
+    (do
+      (println msg)
+      (println "Op:" (type op))
+      (println "Data: " (:mime (edn/read-string data)))
+      (println (s/includes? op "ping"))
+    (if (s/includes? op "ping")
+      (dotimes [n (:times (edn/read-string data))]
+        (Thread/sleep 1000)
+        (println "Hi")
+        (if (= rtn-fmt "lt")
+          (t/send transport (response-for msg { :op op
+                                                :encoding "edn"
+                                                :data (pr-str { :pong n :time (System/currentTimeMillis) }) }))
+          (t/send transport (response-for msg { :pong n :time (System/currentTimeMillis) }))) ;need to be bencodedable
+        (Thread/sleep 1000))
+      (h msg)))))
+
+
+;(response-for { :id 2 } {})
+;(response-for { :foo 1 :op "ping" } :pong true :time (System/currentTimeMillis) :n 2)
+
+

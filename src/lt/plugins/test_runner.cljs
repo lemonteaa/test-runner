@@ -2,7 +2,9 @@
   (:require [lt.object :as object]
             [lt.objs.tabs :as tabs]
             [lt.objs.command :as cmd]
-            [lt.objs.sidebar.workspace :as workspace])
+            [lt.objs.sidebar.workspace :as workspace]
+            [lt.objs.clients :as clients]
+            [lt.plugins.clojure.nrepl :as nrepl])
   (:require-macros [lt.macros :refer [defui behavior]]))
 
 (defui midje-tester-panel [this]
@@ -53,6 +55,19 @@
                       (prn (deref midje-tester))
                       (tabs/add-or-focus! midje-tester)))
 
+(behavior ::on-recv-response
+          :triggers #{:client.ping}
+          :reaction (fn [client info]
+                      (prn "Res: " info)))
+
+;(behavior ::nrepl-send-custom
+;          :triggers #{:send-custom}
+;          :reaction (fn [client payload]
+;                      ))
+
+(object/add-behavior! (-> @(nth (object/by-tag :editor) 3) :client :default) ::on-recv-response)
+
+
 (def midje-tester (object/create ::test_runner.midje-tester))
 
 (cmd/command {:command ::say-hello
@@ -75,6 +90,30 @@ workspace/root
 (map #(-> @% :info (get :path) (or "")) (object/by-tag :editor))
 
 
-(:info @(last (object/by-tag :editor)))
+(object/->id (-> @(nth (object/by-tag :editor) 3) :client :default))
+
+(:behaviors @(nth (object/by-tag :editor) 0))
+
+(object/->id (nth (object/by-tag :editor) 3))
+
 ;;;;
 
+(clients/->message "op-test" { :foo 1 })
+
+(defn t [info]
+  (prn info))
+
+@(keys clients/callbacks)
+
+clients/cb-id
+
+(nrepl/send (-> @(nth (object/by-tag :editor) 3) :client :default)
+            { :id 507 :op "client.ping" :data (pr-str { :foo 1 :times 4 }) :rtn-fmt "lt" })
+
+@clients/callbacks
+
+(clients/send (-> @(nth (object/by-tag :editor) 3) :client :default)
+              "ping"
+              { :foo 1 :times 3 })
+
+(keyword "client.ping")
