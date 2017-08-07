@@ -1,6 +1,6 @@
-{:name "test_runner"
+{:name "test-runner"
  :version "0.0.1"
- :author ""
- :source ""
- :desc ""
+ :author "lemontea"
+ :source "https://github.com/lemonteaa/test-runner"
+ :desc "Run (Clojure) tests automatically in LightTable and display results in GUI"
  :behaviors "test_runner.behaviors"}
