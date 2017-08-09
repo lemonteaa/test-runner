@@ -1,6 +1,7 @@
 (ns lt.plugins.test_runner
   (:require [lt.object :as object]
             [lt.objs.tabs :as tabs]
+            [lt.util.dom :as dom]
             [lt.objs.command :as cmd]
             [lt.objs.sidebar.workspace :as workspace]
             [lt.objs.clients :as clients]
@@ -9,7 +10,8 @@
 
 (defui midje-tester-panel [this proj-name]
   [:div
-    (config-panel this proj-name)])
+    (config-panel this proj-name)
+    (result-tree this)])
 
 (defui config-panel [this proj-name]
   [:div
@@ -22,6 +24,21 @@
       [:input {:type "checkbox" :id "auto-test"}]
       [:label {:for "auto-test"} "Auto-test On Save?"]
       [:button "Run!"]]])
+
+(defui result-tree [this]
+  [:div
+    [:ul {:id "root"}
+      [:li {:id "123"} [:p "a"] "Item 1"]
+      [:li {:id "124"} [:p "a"] "Item 2"
+        [:ul
+          [:li {:id "101"} [:p "a"] "SubItem 1"]
+          [:li {:id "102"} [:p "a"] "SubItem 2"]
+          [:li {:id "103"} [:p "a"] "SubItem 3"
+            [:ul
+              [:li {:id "207"} [:p "a"] "SubSubItem 1"]
+              [:li {:id "208"} [:p "a"] "SubSubItem 2"]]]
+          [:li {:id "104"} [:p "a"] "SubItem 4"]]]
+      [:li {:id "125"} [:p "a"] "Item 3"]]])
 
 (object/object* ::test_runner.midje-tester
                 :tags [:test_runner.midje-tester]
