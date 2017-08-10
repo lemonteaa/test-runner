@@ -29,18 +29,21 @@
 (def pass-css "background-color: #378b2e; color: #92d18b; ")
 (def fail-css "background-color: #aa3939; color: #ffb9b9; ")
 
+(def wait-style { :background-color "#c7e6ff" :color "deepskyblue" })
+(def pass-style { :background-color "#378b2e" :color "#92d18b" })
+(def fail-style { :background-color "#aa3939" :color "#ffb9b9" })
 
 (defui test-item [item]
   (let [{:keys [id label open? result]} item]
-    [:li {:id id}
+    [:li {:id (str "test-" id)}
       [:span "a"]
       (case result
-        :wait [:span { :style wait-css } "Wait"]
-        :pass [:span { :style pass-css } "Pass"]
-        :fail [:span { :style fail-css } "Fail"]
-        [:span { :style wait-css } "Wait"])
+        :wait [:span { :class "test-result" :style wait-css } "Wait"]
+        :pass [:span { :class "test-result" :style pass-css } "Pass"]
+        :fail [:span { :class "test-result" :style fail-css } "Fail"]
+        [:span { :class "test-result" :style wait-css } "Wait"])
       label
-      [:ul { :style "display: none; "}]]))
+      [:ul { :style "display: none; margin-left: 18px"}]]))
 
 (let [{:keys [foo bar baz]} {:foo 1 :bar "a"}]
   baz)
@@ -48,6 +51,17 @@
 (def item1 { :id 10001 :label "Test Item 1" :result :pass })
 (def item2 { :id 10002 :label "Test Item 2" :result :fail })
 (def item3 { :id 10003 :label "Test Item 3" :result :wait })
+
+(def item11 { :id 10101 :label "SubTest Item 1" })
+(def item12 { :id 10102 :label "SubTest Item 2" })
+(def item31 { :id 10301 :label "SubTest Item 3" })
+(def item32 { :id 10302 :label "SubTest Item 4" })
+(def item33 { :id 10303 :label "SubTest Item 5" })
+
+(def item331 { :id 10331 :label "SubSubTest Item 1" })
+(def item332 { :id 10332 :label "SubSubTest Item 2" })
+(def item333 { :id 10333 :label "SubSubTest Item 3" })
+(def item334 { :id 10334 :label "SubSubTest Item 4" })
 
 (defui result-tree [this]
   [:div
@@ -62,7 +76,7 @@
               [:li {:id "207"} [:span "a"] "SubSubItem 1"]
               [:li {:id "208"} [:span "a"] "SubSubItem 2"]]]
           [:li {:id "104"} [:span "a"] "SubItem 4"]]]
-      [:li {:id "125"} [:span "a"] [:span { :style fail-css } "Pass"] "Item 3"]]])
+      [:li {:id "125"} [:span "a"] [:span { :style fail-css } "Fail"] "Item 3"]]])
 
 (object/object* ::test_runner.midje-tester
                 :tags [:test_runner.midje-tester]
@@ -72,7 +86,49 @@
                         (midje-tester-panel this proj-name)))
 
 (dom/append (dom/$ "#root" (object/->content midje-tester))
-            (test-item item3))
+            (test-item item1))
+
+(str "#" 123)
+
+(defn update-tree-result! [doc id result]
+  (let [elem (dom/$ (str "#test-" id " > .test-result") doc)]
+    (dom/html elem (case result
+                     :pass "Pass"
+                     :fail "Fail"
+                     :wait "Wait"
+                     "Wait"))
+    (dom/set-css elem
+                 (case result
+                   :pass pass-style
+                   :fail fail-style
+                   :wait wait-style
+                   wait-style))))
+
+(update-tree-result! (object/->content midje-tester)
+                     10001 :fail)
+
+(dom/html (dom/$ (str "#test-" 10001 " > .test-result")
+       (object/->content midje-tester)) "Bye")
+
+(dom/$ "#hello" (object/->content midje-tester))
+
+(if-let [x 2]
+  x
+  "bye")
+
+(defn update-tree-item! [doc item-context]
+  (reduce (fn [parent-elem item]
+            (if-let [elem (dom/$ (str "#test-" (:id item) " > ul") doc)]
+              elem
+              (do
+                (dom/set-css parent-elem {:display "block"})
+                (dom/append parent-elem (test-item item))
+                (dom/$ (str "#test-" (:id item) " > ul") doc))))
+          (dom/$ "#root" doc)
+          item-context))
+
+(update-tree-item! (object/->content midje-tester)
+                   [item1 item11])
 
 (behavior ::on-close-destroy
           :triggers #{:close}
