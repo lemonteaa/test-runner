@@ -25,11 +25,35 @@
       [:label {:for "auto-test"} "Auto-test On Save?"]
       [:button "Run!"]]])
 
+(def wait-css "background-color: #c7e6ff; color: deepskyblue; ")
+(def pass-css "background-color: #378b2e; color: #92d18b; ")
+(def fail-css "background-color: #aa3939; color: #ffb9b9; ")
+
+
+(defui test-item [item]
+  (let [{:keys [id label open? result]} item]
+    [:li {:id id}
+      [:span "a"]
+      (case result
+        :wait [:span { :style wait-css } "Wait"]
+        :pass [:span { :style pass-css } "Pass"]
+        :fail [:span { :style fail-css } "Fail"]
+        [:span { :style wait-css } "Wait"])
+      label
+      [:ul { :style "display: none; "}]]))
+
+(let [{:keys [foo bar baz]} {:foo 1 :bar "a"}]
+  baz)
+
+(def item1 { :id 10001 :label "Test Item 1" :result :pass })
+(def item2 { :id 10002 :label "Test Item 2" :result :fail })
+(def item3 { :id 10003 :label "Test Item 3" :result :wait })
+
 (defui result-tree [this]
   [:div
     [:ul {:id "root" :style "margin-left: 18px;" }
-      [:li {:id "123"} [:span "a"] "Item 1"]
-      [:li {:id "124"} [:span "a"] "Item 2"
+      [:li {:id "123"} [:span "a"] [:span { :style wait-css } "Wait"] "Item 1"]
+      [:li {:id "124"} [:span "a"] [:span { :style pass-css } "Pass"] "Item 2"
         [:ul { :style "margin-left: 18px;" }
           [:li {:id "101"} [:span "a"] "SubItem 1"]
           [:li {:id "102"} [:span "a"] "SubItem 2"]
@@ -38,7 +62,7 @@
               [:li {:id "207"} [:span "a"] "SubSubItem 1"]
               [:li {:id "208"} [:span "a"] "SubSubItem 2"]]]
           [:li {:id "104"} [:span "a"] "SubItem 4"]]]
-      [:li {:id "125"} [:span "a"] "Item 3"]]])
+      [:li {:id "125"} [:span "a"] [:span { :style fail-css } "Pass"] "Item 3"]]])
 
 (object/object* ::test_runner.midje-tester
                 :tags [:test_runner.midje-tester]
@@ -46,6 +70,9 @@
                 :name "Midje Tester"
                 :init (fn [this proj-name]
                         (midje-tester-panel this proj-name)))
+
+(dom/append (dom/$ "#root" (object/->content midje-tester))
+            (test-item item3))
 
 (behavior ::on-close-destroy
           :triggers #{:close}
