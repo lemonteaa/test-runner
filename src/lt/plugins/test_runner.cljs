@@ -27,18 +27,18 @@
 
 (defui result-tree [this]
   [:div
-    [:ul {:id "root"}
-      [:li {:id "123"} [:p "a"] "Item 1"]
-      [:li {:id "124"} [:p "a"] "Item 2"
-        [:ul
-          [:li {:id "101"} [:p "a"] "SubItem 1"]
-          [:li {:id "102"} [:p "a"] "SubItem 2"]
-          [:li {:id "103"} [:p "a"] "SubItem 3"
-            [:ul
-              [:li {:id "207"} [:p "a"] "SubSubItem 1"]
-              [:li {:id "208"} [:p "a"] "SubSubItem 2"]]]
-          [:li {:id "104"} [:p "a"] "SubItem 4"]]]
-      [:li {:id "125"} [:p "a"] "Item 3"]]])
+    [:ul {:id "root" :style "margin-left: 18px;" }
+      [:li {:id "123"} [:span "a"] "Item 1"]
+      [:li {:id "124"} [:span "a"] "Item 2"
+        [:ul { :style "margin-left: 18px;" }
+          [:li {:id "101"} [:span "a"] "SubItem 1"]
+          [:li {:id "102"} [:span "a"] "SubItem 2"]
+          [:li {:id "103"} [:span "a"] "SubItem 3"
+            [:ul { :style "margin-left: 18px;" }
+              [:li {:id "207"} [:span "a"] "SubSubItem 1"]
+              [:li {:id "208"} [:span "a"] "SubSubItem 2"]]]
+          [:li {:id "104"} [:span "a"] "SubItem 4"]]]
+      [:li {:id "125"} [:span "a"] "Item 3"]]])
 
 (object/object* ::test_runner.midje-tester
                 :tags [:test_runner.midje-tester]
