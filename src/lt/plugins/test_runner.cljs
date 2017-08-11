@@ -140,10 +140,34 @@
 
 (defui summary-panel [this]
   [:div
-    [:span { :style "margin-right: 10px; "} (bound this #(str "Pass: " (get-in % [:res-summary :pass])))]
-    [:span { :style "margin-right: 10px; "} (bound this #(str "Fail: " (get-in % [:res-summary :fail])))]
-    ;[:span "Fail: " (bound this :res-summary)]
+    [:div
+      [:span { :style "margin-right: 10px; "} (bound this #(str "Pass: " (get-in % [:res-summary :pass])))]
+      [:span { :style "margin-right: 10px; "} (bound this #(str "Fail: " (get-in % [:res-summary :fail])))]
+      ;[:span "Fail: " (bound this :res-summary)]
+    ]
+    [:div { :style "height: 22px; width: 80%; background-color: gray; clear: both; "}
+      [:div {:style (bound this #(->> %
+                                      :res-summary
+                                      pass-fail-rate
+                                      :pass
+                                      rate->percent
+                                      (str "float: left; background-color: #378b2e; height: 100%; width: ")))}]
+      [:div {:style (bound this #(->> %
+                                      :res-summary
+                                      pass-fail-rate
+                                      :fail
+                                      rate->percent
+                                      (str "float: left; background-color: #aa3939; height: 100%; width: ")))}]
+    ]
   ])
+
+
+(->> @midje-tester
+    :res-summary
+    pass-fail-rate
+    :pass
+    rate->percent
+    (str "background-color: #378b2e; height: 100%; width: "))
 
 (do
   (object/assoc-in! midje-tester [:res-summary] {:pass 0 :fail 0})
@@ -158,7 +182,19 @@
 (get-in @midje-tester [:res-summary2 :pass])
 (.-value (bound @midje-tester ))
 
+(defn pass-fail-rate [{:keys [pass fail]}]
+  (let [sum (+ pass fail)]
+    (if (= sum 0)
+      { :pass 0 :fail 0 }
+      { :pass (/ pass sum) :fail (/ fail sum) })))
 
+(pass-fail-rate {:pass 3 :fail 6 })
+
+(defn rate->percent [r]
+  (str (* r 100) "%"))
+
+(rate->percent 0.25)
+(rate->percent (/ 4 7))
 
 
 (behavior ::on-close-destroy
