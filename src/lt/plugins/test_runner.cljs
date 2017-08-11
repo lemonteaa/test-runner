@@ -5,12 +5,15 @@
             [lt.objs.command :as cmd]
             [lt.objs.sidebar.workspace :as workspace]
             [lt.objs.clients :as clients]
-            [lt.plugins.clojure.nrepl :as nrepl])
+            [lt.plugins.clojure.nrepl :as nrepl]
+            [crate.core :as crate]
+            [crate.binding :refer [subatom bound map-bound computed]])
   (:require-macros [lt.macros :refer [defui behavior]]))
 
 (defui midje-tester-panel [this proj-name]
   [:div
     (config-panel this proj-name)
+    (summary-panel this)
     (result-tree this)])
 
 (defui config-panel [this proj-name]
@@ -83,7 +86,9 @@
                 :behaviors [::on-close-destroy]
                 :name "Midje Tester"
                 :init (fn [this proj-name]
-                        (midje-tester-panel this proj-name)))
+                        (prn (:res-summary this))
+                        (midje-tester-panel this proj-name))
+                :res-summary {:pass 0 :fail 0})
 
 (dom/append (dom/$ "#root" (object/->content midje-tester))
             (test-item item1))
@@ -105,7 +110,7 @@
                    wait-style))))
 
 (update-tree-result! (object/->content midje-tester)
-                     10001 :fail)
+                     10301 :pass)
 
 (dom/html (dom/$ (str "#test-" 10001 " > .test-result")
        (object/->content midje-tester)) "Bye")
@@ -128,7 +133,33 @@
           item-context))
 
 (update-tree-item! (object/->content midje-tester)
-                   [item1 item11])
+                   ;[item1 item12])
+                   [item3 item33 item332])
+
+
+
+(defui summary-panel [this]
+  [:div
+    [:span { :style "margin-right: 10px; "} (bound this #(str "Pass: " (get-in % [:res-summary :pass])))]
+    [:span { :style "margin-right: 10px; "} (bound this #(str "Fail: " (get-in % [:res-summary :fail])))]
+    ;[:span "Fail: " (bound this :res-summary)]
+  ])
+
+(do
+  (object/assoc-in! midje-tester [:res-summary] {:pass 0 :fail 0})
+  nil)
+(do
+  (object/update! midje-tester [:res-summary :pass] inc)
+  nil)
+(do
+  (object/update! midje-tester [:res-summary :fail] inc)
+  nil)
+
+(get-in @midje-tester [:res-summary2 :pass])
+(.-value (bound @midje-tester ))
+
+
+
 
 (behavior ::on-close-destroy
           :triggers #{:close}
@@ -162,7 +193,7 @@
           :triggers #{:menu-selected}
           :reaction (fn [this path]
                       (object/update! midje-tester [:path] (constantly path))
-                      (object/update! midje-tester [:content] (constantly (midje-tester-panel (deref midje-tester) "My project")))
+                      (object/update! midje-tester [:content] (constantly (midje-tester-panel midje-tester "My project")))
                       (prn (deref midje-tester))
                       (tabs/add-or-focus! midje-tester)))
 
@@ -186,7 +217,7 @@
               :exec (fn []
                       (prn "Test")
                       (object/update! midje-tester [:path] (constantly (-> @(lt.objs.editor.pool/last-active) :info :path)))
-                      (object/update! midje-tester [:content] (constantly (midje-tester-panel (deref midje-tester) "My project")))
+                      (object/update! midje-tester [:content] (constantly (midje-tester-panel midje-tester "My project")))
                       (tabs/add-or-focus! midje-tester))})
 
 workspace/root
