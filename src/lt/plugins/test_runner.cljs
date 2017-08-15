@@ -39,14 +39,28 @@
 (defui test-item [item]
   (let [{:keys [id label open? result]} item]
     [:li {:id (str "test-" id)}
-      [:span "a"]
+      [:span { :data-caret "open" } "v"]
       (case result
         :wait [:span { :class "test-result" :style wait-css } "Wait"]
         :pass [:span { :class "test-result" :style pass-css } "Pass"]
         :fail [:span { :class "test-result" :style fail-css } "Fail"]
         [:span { :class "test-result" :style wait-css } "Wait"])
       label
-      [:ul { :style "display: none; margin-left: 18px"}]]))
+      [:ul { :style "display: none; margin-left: 18px"}]])
+  :click (fn [e]
+           (dom/stop-propagation e)
+           (case (dom/attr (.-target e) "data-caret")
+             "open" (do
+                      (dom/set-attr (.-target e) { :data-caret "closed" })
+                      (dom/html (.-target e) ">")
+                      (dom/set-css (dom/$ "ul" (dom/parent (.-target e)))
+                                   {:display "none"}))
+             "closed" (do
+                        (dom/set-attr (.-target e) { :data-caret "open" })
+                        (dom/html (.-target e) "v")
+                        (dom/set-css (dom/$ "ul" (dom/parent (.-target e)))
+                                     {:display "block"}))
+             (prn (dom/attr (.-target e) "id")))))
 
 (let [{:keys [foo bar baz]} {:foo 1 :bar "a"}]
   baz)
@@ -134,8 +148,8 @@
 
 (update-tree-item! (object/->content midje-tester)
                    ;[item1 item12])
-                   [item3 item33 item332])
-
+                   ;[item3 item33 item334])
+                   [item3 item32])
 
 
 (defui summary-panel [this]
