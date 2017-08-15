@@ -14,7 +14,8 @@
   [:div
     (config-panel this proj-name)
     (summary-panel this)
-    (result-tree this)])
+    (result-tree this)
+    (result-detail this)])
 
 (defui config-panel [this proj-name]
   [:div
@@ -60,7 +61,7 @@
                         (dom/html (.-target e) "v")
                         (dom/set-css (dom/$ "ul" (dom/parent (.-target e)))
                                      {:display "block"}))
-             (prn (dom/attr (.-target e) "id")))))
+             (dom/html (dom/$ "#my-foo") (dom/attr (.-target e) "id")))))
 
 (let [{:keys [foo bar baz]} {:foo 1 :bar "a"}]
   baz)
@@ -209,6 +210,9 @@
 
 (rate->percent 0.25)
 (rate->percent (/ 4 7))
+
+(defui result-detail [this]
+  [:div [:span "ID: "] [:span { :id "my-foo" } "nil"]])
 
 
 (behavior ::on-close-destroy
